@@ -1,7 +1,6 @@
 use std::io;
 
 struct DadosJogo {
-    vez: String,
     lances: usize,
     tabuleiro: [[char; 4]; 4]
 }
@@ -22,8 +21,33 @@ struct Peao {
 }
 
 impl Peao {
-    fn mover(){
+    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
+        if x > 4 || x < 1 || y > 4 || y < 1 {
+            return Err(());
+        }
 
+        match self.casa.y {
+            // Move peão
+            Some(_) => {
+                 
+            },
+            // Coloca peão ainda não posicionado
+            None => {
+                match tabuleiro[y - 1][x - 1] {
+                    '.' => {
+                        self.casa.x = Some(x);
+                        self.casa.y = Some(y);
+                        tabuleiro[y - 1][x - 1] = self.notacao;
+                    },
+                    _ => {
+                        println!("Casa já ocupada.");
+                        return Err(());
+                    }
+                }
+            }
+        }
+
+        return Ok(());
     }
 }
 
@@ -34,8 +58,33 @@ struct Cavalo {
 }
 
 impl Cavalo {
-    fn mover(){
+    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
+        if x > 4 || x < 1 || y > 4 || y < 1 {
+            return Err(());
+        }
 
+        match self.casa.y {
+            // Move cavalo
+            Some(_) => {
+                
+            },
+            // Coloca cavalo ainda não posicionado
+            None => {
+                match tabuleiro[y - 1][x - 1] {
+                    '.' => {
+                        self.casa.x = Some(x);
+                        self.casa.y = Some(y);
+                        tabuleiro[y - 1][x - 1] = self.notacao;
+                    },
+                    _ => {
+                        println!("Casa já ocupada.");
+                        return Err(());
+                    }
+                }
+            }
+        }
+
+        return Ok(());
     }
 }
 
@@ -46,8 +95,33 @@ struct Torre {
 }
 
 impl Torre {
-    fn mover(){
+    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
+        if x > 4 || x < 1 || y > 4 || y < 1 {
+            return Err(());
+        }
 
+        match self.casa.y {
+            // Move torre
+            Some(_) => {
+                
+            },
+            // Coloca torre ainda não posicionada
+            None => {
+                match tabuleiro[y - 1][x - 1] {
+                    '.' => {
+                        self.casa.x = Some(x);
+                        self.casa.y = Some(y);
+                        tabuleiro[y - 1][x - 1] = self.notacao;
+                    },
+                    _ => {
+                        println!("Casa já ocupada.");
+                        return Err(());
+                    }
+                }
+            }
+        }
+
+        return Ok(());
     }
 }
 
@@ -58,48 +132,135 @@ struct Bispo {
 }
 
 impl Bispo {
-    fn mover(){
+    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
+        if x > 4 || x < 1 || y > 4 || y < 1 {
+            return Err(());
+        }
 
+        match self.casa.y {
+            // Move bispo
+            Some(_) => {
+                
+            },
+            // Coloca bispo ainda não posicionado
+            None => {
+                match tabuleiro[y - 1][x - 1] {
+                    '.' => {
+                        self.casa.x = Some(x);
+                        self.casa.y = Some(y);
+                        tabuleiro[y - 1][x - 1] = self.notacao;
+                    },
+                    _ => {
+                        println!("Casa já ocupada.");
+                        return Err(());
+                    }
+                }
+            }
+        }
+
+        return Ok(());
     }
 }
 
 struct Casa {
-    x: Option<u8>,
-    y: Option<u8>
+    x: Option<usize>,
+    y: Option<usize>
 }
 
 
 fn main() {
 
-    let dados_jogo = DadosJogo {
-        vez: String::from("Brancas"),
+    let mut dados_jogo = DadosJogo {
         lances: 0,
         tabuleiro: [['.'; 4]; 4]
     };
 
-    let player1 = jogador_constructor(String::from("Brancas")); 
-    let player2 = jogador_constructor(String::from("Pretas"));
+    let mut player1 = jogador_constructor(String::from("Brancas")); 
+    let mut player2 = jogador_constructor(String::from("Pretas"));
 
-    // Primeira fase do jogo
-    while (dados_jogo.lances <= 6) {
+    loop {
         let mut peca = String::new();
         println!("Insira qual peça deseja posicionar: \n(B (Bispo), N (Cavalo), R (Torre), P (Peão))");
         io::stdin()
             .read_line(&mut peca)
             .expect("Erro ao ler input.");
 
-        let mut casa = String::new();
-        println!("Insira a casa em que deseja posicionar esta peça:");
+        let mut casa_y = String::new();
+        println!("Insira a casa no eixo Y em que deseja posicionar esta peça:");
         io::stdin()
-            .read_line(&mut casa)
+            .read_line(&mut casa_y)
             .expect("Erro ao ler input.");
 
+        let casa_y: usize = match casa_y.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Posição do eixo Y inválida.");
+                continue;
+            }
+        };
+
+        let mut casa_x = String::new();
+        println!("Insira a casa no eixo X em que deseja posicionar esta peça:");
+        io::stdin()
+            .read_line(&mut casa_x)
+            .expect("Erro ao ler input.");
+
+        let casa_x: usize = match casa_x.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Posição do eixo Y inválida.");
+                continue;
+            }
+        };
+
+        let mut res: Result<(), ()> = Err(()); 
+        match peca.trim().chars().nth(0).unwrap() {
+            'p' | 'P' => {
+                if dados_jogo.lances % 2 == 0 {
+                    res = player1.peao.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+                else {
+                    res = player2.peao.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+            },
+            'n' | 'N' => {
+                if dados_jogo.lances % 2 == 0 {
+                    res = player1.cavalo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+                else {
+                    res = player2.cavalo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+            },
+            'r' | 'R' => {
+                if dados_jogo.lances % 2 == 0 {
+                    res = player1.torre.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+                else {
+                    res = player2.torre.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+            },
+            'b' | 'B' => {
+                if dados_jogo.lances % 2 == 0 {
+                    res = player1.bispo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+                else {
+                    res = player2.bispo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
+                }
+            },
+            _ => {
+                println!("Peça inválida");
+                continue;
+            }
+        }
+
+        match res {
+            Ok(_) => print!(""),
+            Err(_) => continue
+        }
+
+        dados_jogo.lances += 1;
+
         mostrar_tabuleiro(&dados_jogo.tabuleiro);
-
-    }
-
-    // Segunda fase do jogo
-    loop {
 
     }
 
