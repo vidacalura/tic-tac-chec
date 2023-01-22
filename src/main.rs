@@ -2,34 +2,134 @@ use std::io;
 
 struct DadosJogo {
     lances: usize,
-    tabuleiro: [[char; 4]; 4]
+    tabuleiro: [[Option<char>; 4]; 4]
 }
 
 struct Peca {
     casa: Casa,
-    notacao: char
+    notacao: char,
+    cor: String
 }
 
 impl Peca {
-    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
-        if x > 4 || x < 1 || y > 4 || y < 1 {
+    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[Option<char>; 4]; 4]) -> Result<(), ()> {
+        if x > 3 || y > 3 {
             return Err(());
         }
 
         match self.casa.y {
             // Move peça
             Some(_) => {
-                
-            },
-            // Coloca peça ainda não posicionado
-            None => {
-                match tabuleiro[y - 1][x - 1] {
-                    '.' => {
-                        self.casa.x = Some(x);
-                        self.casa.y = Some(y);
-                        tabuleiro[y - 1][x - 1] = self.notacao;
+                match self.notacao {
+                    'p' => {
+                        // Mover peão para frente
+                        if y == self.casa.y.unwrap() + 1
+                        && x == self.casa.x.unwrap() {
+                            tabuleiro[self.casa.y.unwrap()][self.casa.x.unwrap()] = None;
+                            tabuleiro[y][x] = Some(self.notacao);
+                        }
+                        else if y == self.casa.y.unwrap() + 1
+                        && x == self.casa.x.unwrap() + 1 {
+                            // Analisa se há uma peça nesta casa para captura
+                            match tabuleiro[y - 1][x - 1] {
+                                Some(v) => {
+                                    // Verifica se peça é do adversário
+                                        tabuleiro[y - 1][x - 1] = None;
+                                        tabuleiro[y][x] = Some(self.notacao);
+                                        // Remover casa.x e casa.y da peça que estava na casa
+                                },
+                                None => {
+                                    println!("\nMovimento inválido\n");
+                                    return Err(());
+                                }
+                            }
+                        }
+                        else if y == self.casa.y.unwrap() + 1
+                        && x + 1 == self.casa.x.unwrap() {
+                            // Analisa se há uma peça nesta casa para captura
+                            match tabuleiro[y - 1][x + 1] {
+                                Some(_) => {
+                                    tabuleiro[y - 1][x + 1] = None;
+                                    tabuleiro[y][x] = Some(self.notacao);
+                                    // Remover casa.x e casa.y da peça que estava na casa
+                                },
+                                None => {
+                                    println!("\nMovimento inválido\n");
+                                    return Err(());
+                                }
+                            }
+                        }
+                        else {
+                            println!("\nMovimento inválido!\n");
+                            return Err(());
+                        }
+                    },
+                    'P' => {
+                        if y + 1 == self.casa.y.unwrap()
+                        && x == self.casa.x.unwrap() {
+                            tabuleiro[self.casa.y.unwrap()][self.casa.x.unwrap()] = None;
+                            tabuleiro[y][x] = Some(self.notacao);
+                        }
+                        else if y + 1 == self.casa.y.unwrap()
+                        && x == self.casa.x.unwrap() + 1 {
+                            // Analisa se há uma peça nesta casa para captura
+                            match tabuleiro[y + 1][x - 1] {
+                                Some(_) => {
+                                    tabuleiro[y + 1][x - 1] = None;
+                                    tabuleiro[y][x] = Some(self.notacao);
+                                    // Remover casa.x e casa.y da peça que estava na casa
+                                },
+                                None => {
+                                    println!("\nMovimento inválido\n");
+                                    return Err(());
+                                }
+                            }
+                        }
+                        else if y + 1 == self.casa.y.unwrap()
+                        && x + 1 == self.casa.x.unwrap() {
+                            // Analisa se há uma peça nesta casa para captura
+                            match tabuleiro[y + 1][x + 1] {
+                                Some(_) => {
+                                    tabuleiro[y + 1][x + 1] = None;
+                                    tabuleiro[y][x] = Some(self.notacao);
+                                    // Remover casa.x e casa.y da peça que estava na casa
+                                },
+                                None => {
+                                    println!("\nMovimento inválido\n");
+                                    return Err(());
+                                }
+                            }
+                        }
+                        else {
+                            println!("\nMovimento inválido!\n");
+                            return Err(());
+                        }
+
+                    },
+                    'n' | 'N' => {
+                        
+                    },
+                    'r' | 'R' => {
+
+                    },
+                    'b' | 'B' => {
+
                     },
                     _ => {
+                        println!("Erro durante o processamento do jogo");
+                        std::process::exit(1);
+                    }
+                }
+            },
+            // Coloca peça ainda não posicionada
+            None => {
+                match tabuleiro[y][x] {
+                    None => {
+                        self.casa.x = Some(x);
+                        self.casa.y = Some(y);
+                        tabuleiro[y][x] = Some(self.notacao);
+                    },
+                    Some(_) => {
                         println!("Casa já ocupada.");
                         return Err(());
                     }
@@ -59,7 +159,7 @@ fn main() {
 
     let mut dados_jogo = DadosJogo {
         lances: 0,
-        tabuleiro: [['.'; 4]; 4]
+        tabuleiro: [[None; 4]; 4]
     };
 
     let mut player1 = jogador_constructor(String::from("Brancas")); 
@@ -99,40 +199,25 @@ fn main() {
                 continue;
             }
         };
+ 
+        let is_vez_brancas: bool = dados_jogo.lances % 2 == 0;
+        let player_pointer = if is_vez_brancas { &mut player1 } else { &mut player2 };
 
-        let mut res: Result<(), ()> = Err(()); 
+        let mut res: Result<(), ()> = Err(());
         match peca.trim().chars().nth(0).unwrap() {
             'p' | 'P' => {
-                if dados_jogo.lances % 2 == 0 {
-                    res = player1.peao.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
-                else {
-                    res = player2.peao.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
+                // -1 se deve pois quando os jogadores escolhem uma casa, escolhem
+                // contando a partir do index 1, a máquina, porém, começa do index 0
+                res = player_pointer.peao.mover(casa_x - 1, casa_y - 1, &mut dados_jogo.tabuleiro);
             },
             'n' | 'N' => {
-                if dados_jogo.lances % 2 == 0 {
-                    res = player1.cavalo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
-                else {
-                    res = player2.cavalo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
+                res = player_pointer.cavalo.mover(casa_x - 1, casa_y - 1, &mut dados_jogo.tabuleiro);
             },
             'r' | 'R' => {
-                if dados_jogo.lances % 2 == 0 {
-                    res = player1.torre.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
-                else {
-                    res = player2.torre.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
+                res = player_pointer.torre.mover(casa_x - 1, casa_y - 1, &mut dados_jogo.tabuleiro);
             },
             'b' | 'B' => {
-                if dados_jogo.lances % 2 == 0 {
-                    res = player1.bispo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
-                else {
-                    res = player2.bispo.mover(casa_x, casa_y, &mut dados_jogo.tabuleiro);
-                }
+                res = player_pointer.bispo.mover(casa_x - 1, casa_y - 1, &mut dados_jogo.tabuleiro);
             },
             _ => {
                 println!("Peça inválida");
@@ -141,8 +226,11 @@ fn main() {
         }
 
         match res {
-            Ok(_) => print!(""),
-            Err(_) => continue
+            Ok(_) => (),
+            Err(_) => {
+                println!("");
+                continue;
+            }
         }
 
         dados_jogo.lances += 1;
@@ -152,7 +240,6 @@ fn main() {
     }
 
 }
-
 
 fn jogador_constructor(cor: String) -> Jogador {
 
@@ -171,28 +258,32 @@ fn jogador_constructor(cor: String) -> Jogador {
                 x: None,
                 y: None
             },
-            notacao: notacao[0]
+            notacao: notacao[0],
+            cor: cor.clone()
         },
         cavalo: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[1]
+            notacao: notacao[1],
+            cor: cor.clone()
         },
         torre: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[2]
+            notacao: notacao[2],
+            cor: cor.clone()
         },
         bispo: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[3]
+            notacao: notacao[3],
+            cor: cor.clone()
         },
         pontos: 0,
         cor
@@ -200,13 +291,18 @@ fn jogador_constructor(cor: String) -> Jogador {
 
 }
 
-fn mostrar_tabuleiro(tabuleiro: &[[char; 4]; 4]) {
+fn mostrar_tabuleiro(tabuleiro: &[[Option<char>; 4]; 4]) {
     print!("\n");
     for i in 0..4 {
+        print!("{} ", i + 1);
         for j in 0..4 {
-            print!("{} ", tabuleiro[i][j]);
+            match tabuleiro[i][j] {
+                None => print!(". "),
+                Some(p) => print!("{} ", p)
+            }
         }
         print!("\n");
     }
+    println!("  1 2 3 4");
     print!("\n");
 }
