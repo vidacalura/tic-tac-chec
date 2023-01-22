@@ -5,144 +5,23 @@ struct DadosJogo {
     tabuleiro: [[char; 4]; 4]
 }
 
-struct Jogador {
-    peao: Peao,
-    cavalo: Cavalo,
-    torre: Torre,
-    bispo: Bispo,
-    pontos: u64,
-    cor: String
-}
-
-struct Peao {
+struct Peca {
     casa: Casa,
-    notacao: char,
-    cor: String
+    notacao: char
 }
 
-impl Peao {
+impl Peca {
     fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
         if x > 4 || x < 1 || y > 4 || y < 1 {
             return Err(());
         }
 
         match self.casa.y {
-            // Move peão
-            Some(_) => {
-                 
-            },
-            // Coloca peão ainda não posicionado
-            None => {
-                match tabuleiro[y - 1][x - 1] {
-                    '.' => {
-                        self.casa.x = Some(x);
-                        self.casa.y = Some(y);
-                        tabuleiro[y - 1][x - 1] = self.notacao;
-                    },
-                    _ => {
-                        println!("Casa já ocupada.");
-                        return Err(());
-                    }
-                }
-            }
-        }
-
-        return Ok(());
-    }
-}
-
-struct Cavalo {
-    casa: Casa,
-    notacao: char,
-    cor: String
-}
-
-impl Cavalo {
-    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
-        if x > 4 || x < 1 || y > 4 || y < 1 {
-            return Err(());
-        }
-
-        match self.casa.y {
-            // Move cavalo
+            // Move peça
             Some(_) => {
                 
             },
-            // Coloca cavalo ainda não posicionado
-            None => {
-                match tabuleiro[y - 1][x - 1] {
-                    '.' => {
-                        self.casa.x = Some(x);
-                        self.casa.y = Some(y);
-                        tabuleiro[y - 1][x - 1] = self.notacao;
-                    },
-                    _ => {
-                        println!("Casa já ocupada.");
-                        return Err(());
-                    }
-                }
-            }
-        }
-
-        return Ok(());
-    }
-}
-
-struct Torre {
-    casa: Casa,
-    notacao: char,
-    cor: String
-}
-
-impl Torre {
-    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
-        if x > 4 || x < 1 || y > 4 || y < 1 {
-            return Err(());
-        }
-
-        match self.casa.y {
-            // Move torre
-            Some(_) => {
-                
-            },
-            // Coloca torre ainda não posicionada
-            None => {
-                match tabuleiro[y - 1][x - 1] {
-                    '.' => {
-                        self.casa.x = Some(x);
-                        self.casa.y = Some(y);
-                        tabuleiro[y - 1][x - 1] = self.notacao;
-                    },
-                    _ => {
-                        println!("Casa já ocupada.");
-                        return Err(());
-                    }
-                }
-            }
-        }
-
-        return Ok(());
-    }
-}
-
-struct Bispo {
-    casa: Casa,
-    notacao: char,
-    cor: String
-}
-
-impl Bispo {
-    fn mover(&mut self, x: usize, y: usize, tabuleiro: &mut [[char; 4]; 4]) -> Result<(), ()> {
-        if x > 4 || x < 1 || y > 4 || y < 1 {
-            return Err(());
-        }
-
-        match self.casa.y {
-            // Move bispo
-            Some(_) => {
-                
-            },
-            // Coloca bispo ainda não posicionado
+            // Coloca peça ainda não posicionado
             None => {
                 match tabuleiro[y - 1][x - 1] {
                     '.' => {
@@ -167,6 +46,14 @@ struct Casa {
     y: Option<usize>
 }
 
+struct Jogador {
+    peao: Peca,
+    cavalo: Peca,
+    torre: Peca,
+    bispo: Peca,
+    pontos: u64,
+    cor: String
+}
 
 fn main() {
 
@@ -279,37 +166,33 @@ fn jogador_constructor(cor: String) -> Jogador {
     };
 
     Jogador {
-        peao: Peao {
+        peao: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[0],
-            cor: cor.clone()
+            notacao: notacao[0]
         },
-        cavalo: Cavalo {
+        cavalo: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[1],
-            cor: cor.clone()
+            notacao: notacao[1]
         },
-        torre: Torre {
+        torre: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[2],
-            cor: cor.clone()
+            notacao: notacao[2]
         },
-        bispo: Bispo {
+        bispo: Peca {
             casa: Casa {
                 x: None,
                 y: None
             },
-            notacao: notacao[3],
-            cor: cor.clone()
+            notacao: notacao[3]
         },
         pontos: 0,
         cor
